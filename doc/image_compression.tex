@@ -1,0 +1,401 @@
+\documentclass[11pt,one,a4paper]{article}
+%\documentclass[11pt,twoside,a4paper]{report}
+%\documentclass[11pt,oneside,a4paper]{report}
+%##############LENGUAJE#############
+%Para lenguaje español
+\usepackage[spanish]{babel}
+\selectlanguage{spanish}
+%Para interpretar los acentos puestos en el texto
+\usepackage[latin1]{inputenc}
+%Para poner imágenes EPS.
+\usepackage{epsfig}
+\usepackage{subfig,graphicx}
+\usepackage{url} 
+\usepackage{mdwlist}
+\usepackage{anysize}
+\usepackage{float}
+\restylefloat{figure}
+\marginsize{1.5cm}{1.5cm}{1.5cm}{1.5cm}
+\setcounter{secnumdepth}{5} % subsubsubsection
+\setcounter{tocdepth}{5}
+\addtolength{\headheight}{0.5pt}
+\usepackage{titlesec}
+\titleformat{\paragraph}
+{\normalfont\normalsize\bfseries}{\theparagraph}{1em}{}
+\titlespacing*{\paragraph}
+{0pt}{3.25ex plus 1ex minus .2ex}{1.5ex plus .2ex}
+% make space for the rule
+\usepackage{makeidx}
+
+
+%########## TITULO Y AUTOR ##########
+\author{
+ \textbf{\Large{Trabajo Práctico Final}} \\
+ \textbf{Análisis de Señales mediante Onditas}\\
+         \\
+         Autor: Ariel Hernández\\
+         Profesor: Dr. Carlos D'Attellis\\ [5cm]
+ \textbf{Universidad Técnologica Nacional} \\
+ \textbf{Regional Buenos Aires}\\ [3cm]
+}
+\title{{\bf \LARGE Compresión de Imágenes mediante Onditas}}
+\date{2014}
+\makeindex
+
+
+\begin{document}
+\clearpage
+\maketitle
+\thispagestyle{empty}
+\newpage
+\clearpage
+\pagenumbering{arabic}
+\tableofcontents
+\newpage
+\section{Introducción}\label{sec:intro}
+Con el avance de la tecnología y el cambio hacía esta nueva era digital debemos manejar cada vez mayor cantidad de información, en donde en muchas oportunidades nos puede traer ciertas dificultades. Toda esta información debe ser almacenada de una manera eficiente, de tal manera que pueda ser manipulada de forma efectiva y práctica. Esto es un gran desafío para esta generación y las que vienen, ya que el aumento de la información es exponencial. Para llevar a cabo esto lo primero que debemos pensar es en el almacenamiento de los datos y métodos de compresión, de tal forma de eliminar cualquier tipo de información redundante.  
+
+\textit{Wavelets} (u \textit{Onditas}) es una herramienta matemática que codifica los datos en diferentes capas (\textit{layers})
+de acuerdo al nivel de aproximación. Estas aproximaciones pueden ser almacenadas utilizando menos espacio
+que la imagen original sin pérdida de información (\textit{lossless}) o bien mucho menos espacio disminuyendo la
+calidad de la imagen hasta niveles aceptables (\textit{lossy}). 
+
+Este trabajo, que se encuentra puntualmente focalizado en la minimización del tamaño de imágenes, es realizado en el marco de la materia \textit{``Análisis de señales mediante onditas''} y busca describir distintas técnicas de compresión utilizando la \textit{Transformada Discreta Wavelet 2D} ($DWT$). Se estudian las diferentes técnicas de \textit{thresholding} o \textit{valor umbral} y se los compara con otras herramientas ($DCT$) y algoritmos comerciales ($JPEG$) que son utilizados para el mismo propósito. Para realizar esta comparación se utilizan los parámetros \textit{Compression Ratio} (CR), \textit{Mean Squares Error} (MSE) y \textit{Peak Signal to Noise Ratio} (PSNR).
+
+\newpage
+\section{Marco del trabajo}\label{sec:work}
+
+Como se ha mencionado anteriormente, este trabajo es realizado como requisito de la materia \textit{``Análisis de señales mediante onditas''} y se utiliza la herramienta \textit{Transformada Discreta Wavelet 2D} ($DWT$) para la compresión de imágenes.
+
+\subsection{Metodología}\label{subsec:methodology}
+
+Se realiza una \textbf{GUI} (\textit{Graphical User Interface}) que nos permite interactuar con las distintas técnicas de compresión implementadas. Esta interfaz gráfica, que es denominada \textsf{icdwt} (Fig. \ref{fig:wavelet_gui_icdwt}) por\textit{ Image Compression Discrete Wavelet Transform}, es programada dentro del entorno de MATLAB\footnote{http://www.mathworks.com/discovery/matlab-gui.html}. Además se utilizaron bases de datos de \textit{imágenes no comprimidas} de \textit{Sam Houston State University}\footnote{http://www.shsu.edu/~qxl005/New/Downloads/index.html} y de la \textit{University of Southern California}\footnote{http://sipi.usc.edu/database/}.
+
+\begin{figure}[h]
+\begin{minipage}[b]{1.0\linewidth}
+  \centering
+  \includegraphics[totalheight=4in]{img/wavelet_matlab_icdwt.png}
+  \end{minipage}
+  \caption{{\textit{La interfaz gráfica} icdwt \textit{realizada en MATLAB}}}
+  \label{fig:wavelet_gui_icdwt}
+\end{figure} 
+
+\subsection{Wavelets}\label{subsec:wavelets}
+
+La herramienta matemática que se elije para efectuar la descomposición de una  \textit{imagen no comprimida} es la \textit{Transformada Discreta Wavelet}, comúnmente conocida como $DWT$, y se va a utilizar la ondita más simple, la \textit{Haar Wavelet}. Se puede decir que es la primera ondita, e incluso aparece antes de que se desarrollara el concepto de \textit{wavelet} \cite{Wavelet:Porwik}.
+
+Wavelets son señales locales en tiempo y en escala, que generalmente tienen una forma irregular. Además exhiben una propiedad ideal para la representación compacta de una señal: \textit{ortogonalidad}. Esta propiedad evita la redundancia de datos y la señal se puede descomponer en muchas pequeñas señales desplazadas y escaladas de la \textit{wavelet} original. Estas onditas tienen la gran ventaja de ser capaz de aislar detalles muy finos en una señal de detalles más secundarios.
+
+\begin{figure}[h]
+\begin{minipage}[b]{1.0\linewidth}
+  \centering
+  \includegraphics[totalheight=3.5in]{img/wavelet_2d_image_descomposition.jpg}
+  \end{minipage}
+  \caption{{\textit{Descomposición de una señal.}}}
+  \label{fig:wavelet_desc_rec}
+\end{figure}
+
+Dado que una imagen es de dos dimensiones (2-D) se requiere la $2-D\ DWT$, por lo tanto un uso típico es aplicar de forma separada la transformada en \textit{filas} y \textit{columnas} de la matriz. Esto sería como utilizar la $1-D\ DWT$ en cada dimensión de la imagen. En palabras sencillas, la $DWT$ aplica dos tipos de filtros a la imagen, uno pasabajos (\textbf{L}) y otro pasaltos (\textbf{H}) sobre las componentes \textit{horizontales} y \textit{verticales} de manera independiente. Estos filtros están relacionados con las funciones de \textit{escala} y las de \textit{wavelets}\cite{Wavelet:Dattellis}, y son los que permiten obtener los tres tipos de \textit{imágenes de detalle}: \textit{vertical} (\textbf{LH}), \textit{horizontal} (\textbf{HL}) y \textit{diagonal} (\textbf{HH})\cite{Wavelet:Porwik}. Luego las operaciones se pueden repetir de forma recursiva sobre la imagen de \textit{aproximación o promedio} (\textbf{LL}), incrementando el nivel de descomposición de la imagen (Fig. \ref{fig:wavelet_img_desc}). Es claro que esta herramienta matemática en cada nivel de descomposición va separando mayor cantidad de detalle (o componente de alta frecuencia).
+
+\begin{figure}[h]
+\begin{minipage}[b]{1.0\linewidth}
+  \centering
+  \includegraphics[totalheight=2.5in]{img/wavelet_level_of_decomposition.jpg}
+  \end{minipage}
+  \caption{{\textit{Descomposición de una imagen.}}}
+  \label{fig:wavelet_img_desc}
+\end{figure}
+
+Las Figs. \ref{fig:wavelet_desc_rec} y \ref{fig:wavelet_img_desc} describen el procedimiento de descomposición a una imagen mediante el uso de la $2-D\ DWT$. En primera instancia, se aplican los filtros a las \textit{filas} y luego a las \textit{columnas}, quedando perfectamente determinadas las \textit{cuatro} sub-imágenes de la imagen original. Si se requiere continuar con los siguientes niveles de descomposición se debe volver a aplicar ambos filtros en la sub-imagen de \textit{promedio o aproximación} \textbf{LL1} (Fig. \ref{fig:wavelet_img_desc}) que contiene los coeficientes $cA_{j+1}$ (Fig. \ref{fig:wavelet_desc_rec}) y así sucesivamente.
+
+\subsection{Técnicas de compresión de imágenes}\label{subsec:compression}
+
+Existen principalmente dos tipos de compresión en general: \textit{lossy} y \textit{lossless}. Cuando se refiere a un tipo de compresión \textit{lossless}, es efectivamente cuando mediante una transformación a un conjunto de datos, en este caso en particular sería una imagen, se logra disminuir su tamaño sin pérdida de información, es decir, la imagen comprimida y la original serían numéricamente idénticas. Por el contrario, cuando se utiliza un tipo de compresión \textit{lossy} siempre existe una degradación relativa a la imagen original. Una ventaja de éste último método es que se logran niveles de mayores de compresión que el primer caso\cite{Wavelet:Porwik}.
+
+Este trabajo solo se focaliza en el tipo de compresión \textit{lossy}, en el cual se muestran diversas técnicas basadas en el método \textit{thresholding}, que se aplica sobre los coeficientes de la \textit{Transformada Discreta Wavelet}. Este método se caracteriza por fijar a \textit{cero} o a un valor estipulado a todos los coeficientes de la transformada que superen un cierto \textit{umbral}.. Dado el valor umbral $\epsilon$ se utilizan las siguientes técnicas de \textit{thresholding}:
+
+\begin{itemize}
+\item \textbf{Hard Thresholding}
+\begin{equation}
+T(\epsilon,x)= \left\{ \begin{array}{lcc}
+             0 &   si  &  |x| < \epsilon \\
+             \\ x &  \forall &  x
+             \end{array}
+   \right.
+\end{equation}
+\item \textbf{Soft Thresholding}
+\begin{equation}
+T(\epsilon,x)= \left\{ \begin{array}{lcc}
+             0 &   si  &  |x| < \epsilon \\
+             \\ Sign(x)(|x|-\epsilon) &  \forall &  x
+             \end{array}
+   \right.
+\end{equation}
+\item \textbf{Universal Thresholding}
+Para este caso en particular se utiliza la función de MATLAB \textsf{wdencmp}\footnote{Ver documentación en http://www.mathworks.com/help/wavelet/ref/wpdencmp.html}, que permite realizar la compresión mediante el uso de distintos valores de umbral calculados a partir de la función \textsf{wthrmngr}\footnote{Ver documentación en http://www.mathworks.com/help/wavelet/ref/wthrmngr.html} en base a los siguientes métodos:
+\begin{itemize}
+\item \textbf{rem\_n0}: Este método calcula el valor del umbral a partir de la \textsf{median(abs(coeficientes de la $DWT$))}.
+\item \textbf{bal\_sn}: La cantidad de información retenida por una imagen luego de la compresión es denomidada \textit{retained energy} y es proporcional a la suma de los cuadrados de los valores de los píxeles. Si este valor es del 100\% entonces la compresión es \textit{lossless}\cite{Wavelet:Lees}. Este método calcula el valor del umbral a partir de igualar los porcentajes de \textit{retained energy} y el número de ceros, esto es:
+\begin{eqnarray}
+Retained\ Energy\ =\ 100*\frac{(norm(CCD,2))^2}{(norm(\textit{original\ signal},2))^2} \\
+Number\ of\ Zeros\ =\ 100*\frac{ZCD}{No.\ of\ coeficients}
+\end{eqnarray}
+En donde $CCD$ y $ZCD$ son los \textit{coeficientes} y el \textit{número de ceros} en la actual descomposición respectivamente\footnote{Ver documentación en http://www.mathworks.com/help/wavelet/ug/data-compression.html}.
+\item \textbf{sqrtbal\_sn}: Es la raíz cuadrada de \textbf{bal\_sn}.
+\end{itemize}
+\end{itemize}
+
+Cada una de estas técnicas fueron utilizadas en nuestra \textbf{GUI} \textsf{icdwt} y los resultados serán expuestos  en la Sección \ref{sec:analresult}.
+
+\newpage
+\section{Análisis de resultados}\label{sec:analresult}
+ En esta sección se van a mostrar diversos resultados a partir de aplicar las técnicas de compresión de imagenes explicadas anteriormente. En la Figs. \ref{fig:lena} y \ref{fig:houses} se muestran las dos imágenes utilizadas en este informe. Si bien la imagen de  \textit{Lena} se encuentra en color, el programa la trabaja en escala de grises.
+ \begin{figure}[h]
+\subfloat[{\footnotesize{\textit{Lena}}}]{
+\label{fig:lena}
+\begin{minipage}[b]{0.5\textwidth}
+\centering \includegraphics[width=2.6in]{img/lena.png}
+\end{minipage}}%
+\subfloat[{\footnotesize{\textit{Houses}}}]{
+\label{fig:houses}
+\begin{minipage}[b]{0.5\textwidth}
+\centering \includegraphics[width=2.6in]{img/houses.png}
+\end{minipage}}
+\caption{\textit{Imágenes en formato .bmp para el análisis de resultados}}
+\label{fig:testfigs}
+\end{figure}
+
+\subsection{Compression Ratio}\label{subsec:cr}
+
+Uno de los parámetros más importantes en un proceso de compresión es el \textit{compression ratio} (CR) o razón de compresión, que brinda un valor cuantitativo respecto a la compresión. Este valor se define como la razón entre el \textit{tamaño de la imagen original} sobre el \textit{tamaño de la imagen resultante} como se muestra en la Ecuación (\ref{eq:cr}).
+
+\begin{equation}\label{eq:cr}
+CR=\frac{size(original\ image)}{size(compressed\ image)}
+\end{equation}
+
+En las Figs. \ref{fig:hardthr} y \ref{fig:softthr} se muestra la variación del valor del CR respecto al nivel de umbral seleccionado. Se puede ver claramente que en la medida que aumentamos el valor de \textit{threshold}, aumenta la razón de compresión. Este comportamiento se manifiesta de esta manera porque al aumentar el valor de umbral estamos eliminando mayor cantidad de información, dando como resultado un menor tamaño de la imagen. 
+
+\begin{figure}
+\centering
+\subfloat[{\footnotesize{\textit{Lena}}}]{
+\label{fig:hardthrlena}
+\centering \includegraphics[width=5in]{img/cr_hard_thr_lena.png}}
+\hspace{3cm}
+\subfloat[{\footnotesize{\textit{Houses}}}]{
+\label{fig:hardthrhouses}
+\centering \includegraphics[width=5in]{img/cr_hard_thr_houses.png}}
+\caption{\textit{Compression Ratio con Hard Thresholding}}
+\label{fig:hardthr}
+\end{figure}
+
+En ambas imágenes de prueba, \textit{lena.bmp} y \textit{houses.bmp}, se observaron comportamientos muy similares respecto a las tendencias de los niveles de CR respecto al valor del umbral, tanto en \textit{hard thresholding} (Fig. \ref{fig:hardthr}) como en \textit{soft thresholding} (Fig. \ref{fig:softthr}). 
+
+Otro factor que afecta el valor del CR es el \textit{nivel de descomposición} ($n$) de la $DWT$ en la imagen. Como se puede observar en las Figs. \ref{fig:hardthr}, \ref{fig:softthr} y \ref{fig:unithr} cuando se aumenta el valor de $n$, el CR normalmente también se incrementa. 
+
+La \textit{calidad} de la imagen comprimida depende del \textit{número de descomposiciones} $n$, a medida que este número se eleva se tendrá mayor éxito en descartar los coeficientes de la $DWT$ menos importantes, que son los que pertenecen a pequeños detalles de la imagen (aquellos que el sistema visual humano es menos sensitivo) y por esta razón el valor de CR se incrementa. Sin embargo, si utilizamos un valor grande de $n$ podríamos causar gran pérdida de eficiencia en el algoritmo de codificación y una caída significativa en la calidad de la imagen. Por lo tanto, el \textit{nivel de descomposición} debe ser una relación de compromiso entre la calidad de la imagen resultante y la complejidad de cálculo.
+
+En todas las gráficas se puede concluir que superando un cierto valor en el nivel de descomposición no se obtienen resultados significativos en el CR dentro de ciertos \textit{umbrales}. A raíz de esto, se podría obtener un valor empírico de la cantidad de descomposiciones que se puede utilizar en una imagen cuya resolución es de $2^{p}x2^{p}$, esto es,
+
+\begin{eqnarray}
+L\acute{i}mite\ te\acute{o}rico\ de\ n=p \\
+Valor\ a\ utilizar\ de\ n=\frac{p-1}{2} 
+\end{eqnarray}
+
+Las imágenes \textit{lena.bmp} y \textit{houses.bmp} tienen una resolución de $256x256$ y $512x512$ respectivamente, lo que nos daría un límite teórico de $8$ y $9$ respectivamente. En este análisis se puede observar que si se utiliza un valor \textit{mayor} de $n=4$ en ambos casos la razón CR no varía significativamente.
+
+\begin{figure}
+\centering
+\subfloat[{\footnotesize{\textit{Lena}}}]{
+\label{fig:softthrlena}
+\centering \includegraphics[width=5in]{img/cr_soft_thr_lena.png}}
+\hspace{3cm}
+\subfloat[{\footnotesize{\textit{Houses}}}]{
+\label{fig:softthrhouses}
+\centering \includegraphics[width=5in]{img/cr_soft_thr_houses.png}}
+\caption{\textit{Compression Ratio con Soft Thresholding}}
+\label{fig:softthr}
+\end{figure}
+
+En la Fig. \ref{fig:unithr} se observa claramente que si superamos la cantidad de descomposiciones de $n=4$, el valor de CR se mantiene prácticamente constante. De hecho, en los métodos \textit{Mediana} y \textit{Square Root Retained Energy} la CR es constante para los niveles de descomposición de $n=1$ a $n=8$.
+
+\begin{figure}
+\centering
+\subfloat[{\footnotesize{\textit{Lena}}}]{
+\label{fig:unithrlena}
+\centering \includegraphics[width=6in]{img/cr_uni_thr_s_h_lena.png}}
+\hspace{3cm}
+\subfloat[{\footnotesize{\textit{Houses}}}]{
+\label{fig:unithrhouses}
+\centering \includegraphics[width=6in]{img/cr_uni_thr_s_h_houses.png}}
+\caption{\textit{Compression Ratio con Universal Thresholding}}
+\label{fig:unithr}
+\end{figure}
+
+\subsection{Peak Signal to Noise Ratio}\label{subsec:psnr}
+
+En esta sección se va a analizar el comportamiento del \textit{Peak Signal to Noise Ratio} (PSNR) o relación señal a ruido pico en función del valor de \textit{threshold} y el \textit{nivel de descomposición} $n$. En la Ecuación (\ref{eq:psnr}) se define el PSNR para una imagen escala de grises ($8\ bits/pixel$)\cite{Wavelet:Porwik}. 
+
+\begin{equation}\label{eq:psnr}
+PSNR(dB)=20*log_{10}(\frac{255}{\sqrt{MSE}})
+\end{equation}
+
+En donde MSE es el \textit{Mean Square Error} definido por,
+
+\begin{equation}\label{eq:mse}
+MSE=\frac{1}{r*c} \sum_{y=1}^r \sum_{x=1}^c (I(x,y)-I'(x,y))^2
+\end{equation}
+
+En la Ecuación (\ref{eq:mse}) $I(x,y)$ e $I'(x,y)$ son la imagen original y la comprimida respectivamente de dimensiones $rxc$.
+
+\begin{figure}
+\centering
+\subfloat[{\footnotesize{\textit{Lena}}}]{
+\label{fig:phardthrlena}
+\centering \includegraphics[width=5in]{img/psnr_hard_thr_lena.png}}
+\hspace{3cm}
+\subfloat[{\footnotesize{\textit{Houses}}}]{
+\label{fig:phardthrhouses}
+\centering \includegraphics[width=5in]{img/psnr_hard_thr_houses.png}}
+\caption{\textit{Peak Signal to Noise Ratio con Hard Thresholding}}
+\label{fig:phardthr}
+\end{figure}
+
+En las Figs. \ref{fig:phardthr}, \ref{fig:psoftthr} y \ref{fig:punithr} se muestran los valores de PSNR en $dB$ de cada una de las técnicas de compresión. Se puede ver que el comportamiento es similar al que se observo con el de \textit{compression ratio}. Cuando se aumentan los niveles de \textit{threshold} el valor de PSNR disminuye. También se observa, como en el caso anterior del CR, que luego de un nivel de descomposición $n$ el PSNR se mantiene prácticamente constante.
+
+\begin{figure}
+\centering
+\subfloat[{\footnotesize{\textit{Lena}}}]{
+\label{fig:psoftthrlena}
+\centering \includegraphics[width=5in]{img/psnr_soft_thr_lena.png}}
+\hspace{3cm}
+\subfloat[{\footnotesize{\textit{Houses}}}]{
+\label{fig:psoftthrhouses}
+\centering \includegraphics[width=5in]{img/psnr_soft_thr_houses.png}}
+\caption{\textit{Peak Signal to Noise Ratio con Soft Thresholding}}
+\label{fig:psoftthr}
+\end{figure}
+
+\begin{figure}
+\centering
+\subfloat[{\footnotesize{\textit{Lena}}}]{
+\label{fig:punithrlena}
+\centering \includegraphics[width=6in]{img/psnr_uni_thr_s_h_lena.png}}
+\hspace{3cm}
+\subfloat[{\footnotesize{\textit{Houses}}}]{
+\label{fig:punithrhouses}
+\centering \includegraphics[width=6in]{img/psnr_uni_thr_s_h_houses.png}}
+\caption{\textit{Peak Signal to Noise Ratio con Universal Thresholding}}
+\label{fig:punithr}
+\end{figure}
+
+\subsection{Comparación con las técnicas DCT/JPEG}\label{subsec:comparison}
+
+En esta sección se va a realizar una comparación entre las diferentes técnicas de compresión de imágenes expuestas en este trabajo con otras conocidas y ampliamente utilizadas, con es el caso del $JPEG$. 
+
+En la Fig. \ref{fig:comparison} se muestra el valor de PSNR en función de la razón de compresión (CR) para diferentes métodos de compresión basados en las siguientes herramientas:
+
+\begin{itemize}
+\item \textit{Joint Photographic Experts Group }$JPEG$\footnote{Se utilizó directamente el algoritmo comercial que tiene MATLAB para generar una imagen \textit{.jpg}. Ver documentación en http://www.mathworks.com/help/matlab/ref/imwrite.html.} 
+\item \textit{Discrete Cosine Transform} $DCT$\footnote{Programa para comprimir una imagen basado en la herramienta \textit{Discrete Cosine Transform} obtenido a través de la documentación de MATLAB. Para más información ver en http://www.mathworks.com/help/images/discrete-cosine-transform.html.}
+\item \textit{Discrete Wavelet Transform} $DWT$
+\end{itemize}
+
+Se puede observar que cuando se obtienen niveles de CR más altos, los valores de PSNR disminuyen. Si tenemos en cuenta los gráficos de la sección anterior este comportamiento es esperado, ya que al elevarse el valor del \textit{compression ratio} existe una pérdida de información y esto impacta directamente en el PSNR. 
+
+Si bien la $DCT$ es la base del $JPEG$, éste último es un algoritmo comercial y por lo tanto tiene ciertas optimizaciones que mejoran su \textit{performance} respecto al \textit{thresholding} con $WDT$ o eliminando coeficientes en la $DCT$ de la imagen. De todas maneras se puede ver que el resultado obtenido con las diferentes técnicas de \textit{umbral} con la $WDT$ es aceptable si tomamos como referencia a $JPEG$. En los Cuadros \ref{tab:paramdctjpglena} y \ref{tab:paramwdtlena} se muestran los parámetros CR, MSE y PSNR para los diferentes métodos de compresión utilizados en este análisis de comparació. Estos valores pertenecen a la imagen \textit{lena.bmp}.
+
+\begin{figure}
+\centering
+\subfloat[{\footnotesize{\textit{Lena}}}]{
+\label{fig:comparisonlena}
+\centering \includegraphics[width=6in]{img/psnr_jpeg_dct_dwt_comparison_lena.png}}
+\hspace{3cm}
+\subfloat[{\footnotesize{\textit{Houses}}}]{
+\label{fig:comparisonhouses}
+\centering \includegraphics[width=6in]{img/psnr_jpeg_dct_dwt_comparison_houses.png}}
+\caption{\textit{Comparación entre JPEG, DCT y WDT}}
+\label{fig:comparison}
+\end{figure}
+
+\begin{table}[H]
+\centering
+\begin{tabular}{||c c c c c||}
+\hline
+\hline
+Método & Porcentaje & CR & MSE & PSNR \\
+\hline
+\hline
+DCT & 10 &	15,9992675781250 & 33,1658172607422 & 	32,9238965736536 \\
+JPG	& 10 & 22,3596042306380 & 30,2598724365234 & 	33,3221326798810 \\
+DCT	& 20	& 7,11078559027778 & 22,7182922363281 & 	34,5670467908486 \\
+JPG	& 20&	15,2728967606619 & 19,7931976318359 & 	35,1656439982570 \\
+DCT	& 30	&3,99981689453125	 & 15,5617675781250 & 36,2102143622017 \\
+JPG	& 30	 &12,0803686635945	& 15,9608764648438 & 36,1002362464306 \\
+DCT	& 40 & 2,56018283392585 & 9,66026306152344 & 	38,2809140788798 \\
+JPG	& 40	 & 10,3011631562402	 & 13,6004943847656 & 36,7952566538937 \\
+DCT	& 50	 & 2,56018283392585	 & 9,66026306152344 & 38,2809140788798 \\
+JPG	& 50	 & 9,05443492677535	 & 11,6411285400391 & 37,4708527617657 \\
+DCT	& 60	 & 1,77784107864681	 & 4,85775756835938 & 41,2664452379339 \\
+JPG	& 60	 & 8,01663608562691	 & 9,84425354003906 & 38,1989757038185 \\
+DCT	& 70	 & 1,77784107864681	 & 4,85775756835938	 & 41,2664452379339 \\
+JPG	& 70	 & 6,85236302802175 & 7,79959106445313 & 39,2100852780655 \\
+DCT	& 80	 & 1,30614075299464 & 1,63732910156250	 & 45,9894437991197 \\
+JPG	& 80	 & 5,49752537538797	 & 5,32379150390625	 & 40,8685932204350 \\
+DCT	& 90	 & 1,30614075299464	 & 1,63732910156250 & 	45,9894437991197 \\
+JPG	& 90	 & 3,79149551634365	 & 2,42730712890625 & 	44,2795562946789 \\
+\hline
+\hline
+\end{tabular}
+\caption{\textit{Parámetros de compresión en los métodos de $JPEG$ y $DCT$ para lena.bmp}}
+\label{tab:paramdctjpglena}
+\end{table}
+
+\begin{table}[H]
+\centering
+\begin{tabular}{|| c  c  c  c  c  c  c ||} 
+\hline
+\hline
+Método & $n$ & Threshold & Tipo TRH & CR & MSE & PSNR \\ 
+\hline
+\hline
+DWT & 1 & 50 &  SOFT &  3,69816601167084 & 	243,424942016602 & 	24,2671528563775\\
+DWT & 2 & 50 &  SOFT &  11,3468155197657 & 	152,373992919922 & 	26,3016951259925\\
+DWT & 1 & 50 &  HARD &  3,69750550693576	 & 18,0854187011719 & 	35,5575179316681\\
+DWT & 2 &  50 &  HARD &  11,3405889884763 & 	25,9331359863281 & 	33,9922532349666\\
+DWT & 1 &  - &  UNI-ENERGY &  4,56568404028523 & 	59,4000549316406 & 	30,3929351426218\\
+DWT & 2 &  -  & UNI-ENERGY &  18,9541424640783	 & 76,9305877685547 & 	29,2698131030115\\
+\hline
+\hline
+\end{tabular}
+\caption{\textit{Parámetros de compresión en los métodos de $WDT$ para lena.bmp}}
+\label{tab:paramwdtlena}
+\end{table}
+
+\newpage
+\section{Conclusiones}\label{sec:conclusion}
+
+Es importante aclarar que las técnicas de compresión expuestas en este trabajo utilizan los coeficientes de la \textit{Transformada Discreta Wavelet} para disminuir el tamaño una imagen. La $DWT$ no realiza la compresión, solo nos permite expresar nuestra imagen de tal manera que usando ciertos métodos sobre sus coeficientes se pueda lograr comprimir su tamaño. 
+
+Un punto de estudio que luego de leer varios \textit{papers} no se suele trabajar es el \textit{nivel de descomposición} de una imagen y su efecto tanto en la PSNR y en la CR. Creo que es necesario tenerlo muy en cuenta en el costo computacional y en la calidad de la imagen, ya que juega un rol importante en estas cuestiones.
+
+Luego de realizar este estudio acerca de compresión de imágenes, es claro que la $DWT$ es una herramienta muy poderosa para este tipo de aplicaciones y estimo que por esta razón el grupo $JPEG$ realizó el estándar de compresión $JPEG\ 2000$ basado en \textit{wavelets}. 
+
+\newpage
+\begin{thebibliography}{99}
+\bibitem{Wavelet:Dattellis}
+C. D' Attellis M. Anaya M. Cavallaro F. Villaverde, \emph{Introducción a las Onditas}, \relax Editorial Nueva Librería, Segunda Edición, 2012.
+\bibitem{Wavelet:Porwik}
+P. Porwik A. Lisowska , \emph{The Haar-Wavelet Transform in Digital Image Processing: Its Status and Architecture}, \relax Machine Graphics \& Vision, vol. 13, nro 1/2, pp. 79-98, 2004.
+\bibitem{Wavelet:Hasan}
+K. Hasan K. Harada, \emph{Haar Wavelet Based Approach for Image Compression and Quality Assesment of Compressed Image},  \relax IAENG International Journal of Applied Mathematics, 36:1, IJAM\_36\_1\_9, 2007.
+\bibitem{Wavelet:Mallat}
+S. Mallat, \emph{A wavelet tour of signal processing}, \relax Academic Press, Second Edition, 1999.
+\bibitem{Wavelet:Stollnitz}
+E. Stollnitz T. DeRose D. Salesin, \emph{Wavelets for Computer Graphics: A Primer}, \relax IEEE Computer Graphics and Applications, 15(3) and 15(4), 1995.
+\bibitem{Wavelet:Lees}
+K. Lees, \emph{Image Compression Using Wavelets}, \relax Portland State University, 2002.
+\end{thebibliography}
+\end{document}
+
+
+

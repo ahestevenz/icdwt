@@ -1,0 +1,17 @@
+*****************************************************************************************
+*
+* Wavelet Haar: Image Compression application
+* Autor: Ariel Hernández
+* Prof.: Dr. D'Atellis
+*
+*****************************************************************************************
+
+-> Introducción
+-> Wavelet Haar
+-> Compresión de Imágenes
+-> Análisis de Resultados
+-> Conclusiones
+-> Bibliografía
+   -0Haar_Wavelet_based_approach_Image_Compression
+   -
+
