@@ -1,10 +1,10 @@
 ## Image compression using Wavelet transform 
 
-MATLAB GUI tool (icdwt) compresses _bmp_ images using the Discrete Wavelet Transform (DWT) and compares the results with several compression techniques like JPG and Discrete Cosine Transform (DCT). The metrics that *icdwt* uses are the [Compression Ratio](https://en.wikipedia.org/wiki/Data_compression_ratio) (CR) and [Peak Signal to Noise Ratio](https://en.wikipedia.org/wiki/Peak_signal-to-noise_ratio) (PSNR) with good results.
+**icdwt** is a MATLAB GUI tool which compresses _bmp_ images using the Discrete Wavelet Transform (DWT) and compares the results with several compression techniques like JPG and Discrete Cosine Transform (DCT). The metrics that **icdwt** uses are the [Compression Ratio](https://en.wikipedia.org/wiki/Data_compression_ratio) (CR) and [Peak Signal to Noise Ratio](https://en.wikipedia.org/wiki/Peak_signal-to-noise_ratio) (PSNR) with good results.
 
 <p align="center"><img src="doc/img/wavelet_matlab_icdwt.png" width="600"></p>
 
-For the tests it has been used the following image (in his _bmp_ version),
+For the tests it has been used the following image (in its _bmp_ version),
 
 <p align="center"><img src="doc/img/houses.png" width="400"></p>
 
